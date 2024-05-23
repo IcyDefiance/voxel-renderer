@@ -1,9 +1,8 @@
 mod movement;
-mod voxels;
 
 use bevy::prelude::*;
+use bevy_voxels::{octree::Octree, ChunkLoader, VoxelRenderPlugin};
 use movement::FlycamPlugin;
-use voxels::{ChunkLoader, VoxelRenderPlugin};
 
 fn main() {
 	App::new()
@@ -57,6 +56,14 @@ fn setup(
 	// 	transform: Transform::from_xyz(-5.0, 30.0, 15.0).looking_at(Vec3::ZERO, Vec3::Y),
 	// 	..default()
 	// });
+
+	let mut octree = Octree::new(16);
+	octree.set_voxel(UVec3 { x: 8, y: 8, z: 8 }, 1);
+	info!("{:?}", octree);
+	let value = octree.voxel_cursor(UVec3 { x: 8, y: 8, z: 8 }).move_to_leaf().value();
+	info!("{:?}", value);
+	let value = octree.voxel_cursor(UVec3 { x: 9, y: 8, z: 8 }).move_to_leaf().value();
+	info!("{:?}", value);
 }
 
 #[derive(Component)]
