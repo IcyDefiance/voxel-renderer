@@ -1,7 +1,8 @@
 #define_import_path voxels::ray_march
 
-#import bevy_render::view View
-#import bevy_pbr::mesh_bindings mesh
+#import bevy_pbr::mesh_functions::get_model_matrix
+#import bevy_render::view::View
+#import bevy_pbr::mesh_bindings::mesh
 
 @group(1) @binding(0)
 var chunk_texture: texture_3d<f32>;
@@ -14,11 +15,11 @@ struct RayMarchOutput {
 
 // Based on A Fast Voxel Traversal Algorithm for Ray Tracing (http://www.cse.yorku.ca/~amana/research/grid.pdf) with
 // more concise code taken from Branchless Voxel Raycasting (https://www.shadertoy.com/view/4dX3zl)
-fn ray_march(in_world_position: vec3<f32>, view: View, front_facing: bool) -> RayMarchOutput {
+fn ray_march(instance_index: u32, in_world_position: vec3<f32>, view: View, front_facing: bool) -> RayMarchOutput {
     let forward = normalize(in_world_position - view.world_position.xyz);
     let step = sign(forward);
 
-    let chunk_origin = mesh.model[3].xyz;
+    let chunk_origin = get_model_matrix(instance_index)[3].xyz;
     var chunk_pos = vec3(0.0);
     if (front_facing) {
       chunk_pos = in_world_position - chunk_origin;

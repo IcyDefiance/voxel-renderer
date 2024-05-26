@@ -12,7 +12,7 @@ use bevy::{
 			AddressMode, AsBindGroup, Extent3d, FilterMode, RenderPipelineDescriptor, SamplerDescriptor, ShaderRef,
 			SpecializedMeshPipelineError, TextureDimension, TextureFormat,
 		},
-		texture::ImageSampler,
+		texture::{ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor},
 	},
 	utils::HashMap,
 };
@@ -43,7 +43,7 @@ impl ChunkLoader {
 
 fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, assets: Res<AssetServer>) {
 	commands.insert_resource(VoxelRenderGlobals {
-		ray_march_shader: assets.load::<Shader, _>("shaders/ray_march.wgsl"),
+		ray_march_shader: assets.load::<Shader>("shaders/ray_march.wgsl"),
 	});
 	commands.insert_resource(LoadedChunks(HashMap::new()));
 	commands.insert_resource(ChunkBox::new(&mut meshes));
@@ -154,7 +154,7 @@ struct VoxelRenderGlobals {
 }
 
 // This is the struct that will be passed to your shader
-#[derive(AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
+#[derive(Asset, AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
 #[uuid = "f690fdae-d598-45ab-8225-97e2a3f056e0"]
 struct ChunkMaterial {
 	#[texture(0, dimension = "3d")]
@@ -214,16 +214,16 @@ pub fn init_chunk(images: &mut Assets<Image>) -> Handle<Image> {
 	let format = TextureFormat::Rgba8UnormSrgb;
 	let mut image = Image::new(size, TextureDimension::D3, data, format);
 
-	let sampler = SamplerDescriptor {
-		address_mode_u: AddressMode::ClampToEdge,
-		address_mode_v: AddressMode::ClampToEdge,
-		address_mode_w: AddressMode::ClampToEdge,
-		mag_filter: FilterMode::Nearest,
-		min_filter: FilterMode::Nearest,
-		mipmap_filter: FilterMode::Nearest,
+	let sampler = ImageSamplerDescriptor {
+		address_mode_u: ImageAddressMode::ClampToEdge,
+		address_mode_v: ImageAddressMode::ClampToEdge,
+		address_mode_w: ImageAddressMode::ClampToEdge,
+		mag_filter: ImageFilterMode::Nearest,
+		min_filter: ImageFilterMode::Nearest,
+		mipmap_filter: ImageFilterMode::Nearest,
 		..Default::default()
 	};
-	image.sampler_descriptor = ImageSampler::Descriptor(sampler);
+	image.sampler = ImageSampler::Descriptor(sampler);
 
 	images.add(image)
 }

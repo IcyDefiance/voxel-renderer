@@ -3,8 +3,11 @@ mod movement;
 use bevy::prelude::*;
 use bevy_voxels::{octree::Octree, ChunkLoader, VoxelRenderPlugin};
 use movement::FlycamPlugin;
+use std::env::set_var;
 
 fn main() {
+	set_var("WGPU_BACKEND", "vulkan");
+
 	App::new()
 		.add_plugins((DefaultPlugins, FlycamPlugin, VoxelRenderPlugin))
 		.add_systems(Startup, setup)
