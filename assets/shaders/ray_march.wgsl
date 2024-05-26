@@ -4,7 +4,7 @@
 #import bevy_render::view::View
 #import bevy_pbr::mesh_bindings::mesh
 
-@group(1) @binding(0)
+@group(2) @binding(0)
 var chunk_texture: texture_3d<f32>;
 
 struct RayMarchOutput {
@@ -16,7 +16,7 @@ struct RayMarchOutput {
 // Based on A Fast Voxel Traversal Algorithm for Ray Tracing (http://www.cse.yorku.ca/~amana/research/grid.pdf) with
 // more concise code taken from Branchless Voxel Raycasting (https://www.shadertoy.com/view/4dX3zl)
 fn ray_march(instance_index: u32, in_world_position: vec3<f32>, view: View, front_facing: bool) -> RayMarchOutput {
-    let forward = normalize(in_world_position - view.world_position.xyz);
+    let forward = normalize(in_world_position - view.world_position);
     let step = sign(forward);
 
     let chunk_origin = get_model_matrix(instance_index)[3].xyz;
@@ -24,21 +24,21 @@ fn ray_march(instance_index: u32, in_world_position: vec3<f32>, view: View, fron
     if (front_facing) {
       chunk_pos = in_world_position - chunk_origin;
     } else {
-      chunk_pos = view.world_position.xyz - chunk_origin;
+      chunk_pos = view.world_position - chunk_origin;
     }
 
     let t_delta = abs(1.0 / forward);
 
     var voxel_idx: vec3<f32> = min(floor(chunk_pos), vec3(15.0));
     var pos_in_voxel = chunk_pos - voxel_idx;
-    var t_max = (step * (chunk_origin + voxel_idx - view.world_position.xyz) + (step * 0.5) + 0.5) * t_delta;
+    var t_max = (step * (chunk_origin + voxel_idx - view.world_position) + (step * 0.5) + 0.5) * t_delta;
     var world_normal = vec3<f32>(vec3(16.0) == chunk_pos) - vec3<f32>(vec3(0.0) == chunk_pos);
 
     while (true) {
         let voxel = textureLoad(chunk_texture, vec3<i32>(voxel_idx), 0);
         if (voxel.x > 0.0) {
             let voxel_world_pos = chunk_origin + voxel_idx;
-            let world_pos = vec4(intersect_ray_aabb(view.world_position.xyz, forward, voxel_world_pos, voxel_world_pos + 1.0), 1.0);
+            let world_pos = vec4(intersect_ray_aabb(view.world_position, forward, voxel_world_pos, voxel_world_pos + 1.0), 1.0);
             let clip_pos = view.view_proj * world_pos;
 
             var out: RayMarchOutput;

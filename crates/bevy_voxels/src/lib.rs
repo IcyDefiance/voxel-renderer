@@ -3,14 +3,16 @@ pub mod octree;
 mod math;
 
 use bevy::{
+	math::vec3,
 	pbr::{MaterialPipeline, MaterialPipelineKey},
 	prelude::*,
-	reflect::{TypePath, TypeUuid},
+	reflect::TypePath,
 	render::{
 		mesh::MeshVertexBufferLayout,
+		render_asset::RenderAssetUsages,
 		render_resource::{
-			AddressMode, AsBindGroup, Extent3d, FilterMode, RenderPipelineDescriptor, SamplerDescriptor, ShaderRef,
-			SpecializedMeshPipelineError, TextureDimension, TextureFormat,
+			AsBindGroup, Extent3d, RenderPipelineDescriptor, ShaderRef, SpecializedMeshPipelineError, TextureDimension,
+			TextureFormat,
 		},
 		texture::{ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor},
 	},
@@ -132,17 +134,10 @@ struct ChunkBox {
 }
 impl ChunkBox {
 	fn new(meshes: &mut Assets<Mesh>) -> Self {
-		let mesh = meshes.add(
-			shape::Box {
-				min_x: 0.,
-				max_x: 16.,
-				min_y: 0.,
-				max_y: 16.,
-				min_z: 0.,
-				max_z: 16.,
-			}
-			.into(),
-		);
+		let mut cube = Cuboid::new(16., 16., 16.).mesh();
+		cube.translate_by(vec3(8., 8., 8.));
+
+		let mesh = meshes.add(cube);
 		Self { mesh }
 	}
 }
@@ -154,8 +149,7 @@ struct VoxelRenderGlobals {
 }
 
 // This is the struct that will be passed to your shader
-#[derive(Asset, AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
-#[uuid = "f690fdae-d598-45ab-8225-97e2a3f056e0"]
+#[derive(Asset, AsBindGroup, TypePath, Debug, Clone)]
 struct ChunkMaterial {
 	#[texture(0, dimension = "3d")]
 	chunk: Handle<Image>,
@@ -212,7 +206,13 @@ pub fn init_chunk(images: &mut Assets<Image>) -> Handle<Image> {
 		depth_or_array_layers: 16,
 	};
 	let format = TextureFormat::Rgba8UnormSrgb;
-	let mut image = Image::new(size, TextureDimension::D3, data, format);
+	let mut image = Image::new(
+		size,
+		TextureDimension::D3,
+		data,
+		format,
+		RenderAssetUsages::RENDER_WORLD,
+	);
 
 	let sampler = ImageSamplerDescriptor {
 		address_mode_u: ImageAddressMode::ClampToEdge,

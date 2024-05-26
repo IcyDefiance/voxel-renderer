@@ -21,9 +21,9 @@ fn setup(
 ) {
 	// plane
 	commands.spawn(PbrBundle {
-		mesh: meshes.add(shape::Plane::from_size(50.0).into()),
+		mesh: meshes.add(Plane3d::default().mesh().size(50., 50.)),
 		transform: Transform::from_xyz(8.0, 0.0, 8.0),
-		material: std_materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
+		material: std_materials.add(Color::rgb(1.0, 1.0, 1.0)),
 		..default()
 	});
 
@@ -40,7 +40,7 @@ fn setup(
 	// light
 	commands.spawn(PointLightBundle {
 		point_light: PointLight {
-			intensity: 6000.0,
+			intensity: 6000000.0,
 			range: 200.0,
 			shadows_enabled: true,
 			..default()

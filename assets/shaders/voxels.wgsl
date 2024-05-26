@@ -20,7 +20,7 @@ fn fragment(in: VertexOutput, @builtin(front_facing) front_facing: bool) -> Frag
     pbr.world_position = res.world_pos;
     pbr.world_normal = res.world_normal;
     pbr.N = res.world_normal;
-    pbr.V = normalize(view.world_position.xyz - res.world_pos.xyz);
+    pbr.V = normalize(view.world_position - res.world_pos.xyz);
     pbr.material.base_color = vec4(0.0, 1.0, 0.0, 1.0);
 
     var out: FragmentOutput;

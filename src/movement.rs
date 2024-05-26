@@ -16,8 +16,8 @@ impl Plugin for FlycamPlugin {
 fn window_controls(
 	mut commands: Commands,
 	mut window: Query<(Entity, &mut Window)>,
-	mouse: Res<Input<MouseButton>>,
-	key: Res<Input<KeyCode>>,
+	mouse: Res<ButtonInput<MouseButton>>,
+	key: Res<ButtonInput<KeyCode>>,
 ) {
 	if mouse.just_pressed(MouseButton::Left) {
 		let (_, mut window) = window.single_mut();
@@ -50,7 +50,7 @@ fn flycam(
 	time: Res<Time>,
 	window: Query<&Window>,
 	mut mouse_motion_events: EventReader<MouseMotion>,
-	key: Res<Input<KeyCode>>,
+	key: Res<ButtonInput<KeyCode>>,
 ) {
 	if window.single().cursor.grab_mode != CursorGrabMode::Locked {
 		return;
@@ -58,7 +58,7 @@ fn flycam(
 
 	let mut camera_transform = cameras.single_mut();
 
-	for event in mouse_motion_events.iter() {
+	for event in mouse_motion_events.read() {
 		camera_transform.rotate_axis(Vec3::Y, -event.delta.x * 0.003);
 		camera_transform.rotate_local_axis(Vec3::X, -event.delta.y * 0.003);
 	}
@@ -66,16 +66,16 @@ fn flycam(
 	let forward = camera_transform.forward();
 	let right = camera_transform.right();
 	let up = camera_transform.up();
-	if key.pressed(KeyCode::W) {
+	if key.pressed(KeyCode::KeyW) {
 		camera_transform.translation += forward * time.delta_seconds() * 10.0;
 	}
-	if key.pressed(KeyCode::S) {
+	if key.pressed(KeyCode::KeyS) {
 		camera_transform.translation -= forward * time.delta_seconds() * 10.0;
 	}
-	if key.pressed(KeyCode::A) {
+	if key.pressed(KeyCode::KeyA) {
 		camera_transform.translation -= right * time.delta_seconds() * 10.0;
 	}
-	if key.pressed(KeyCode::D) {
+	if key.pressed(KeyCode::KeyD) {
 		camera_transform.translation += right * time.delta_seconds() * 10.0;
 	}
 	if key.pressed(KeyCode::Space) {
